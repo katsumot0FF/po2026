@@ -1,43 +1,78 @@
 package agh.po.lab2;
+
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.Scanner;
 
 public class Lotto {
-    public static void main(String[] args) {
-        ArrayList<Integer> typy = new ArrayList<>();
 
-        if (args.length > 0) {
+    public static void main(String[] args) {
+        if (args.length != 6) {
+            System.out.println("Błąd: Podaj dokładnie 6 liczb (od 1 do 49) jako argumenty wywołania.");
+            return;
+        }
+
+        ArrayList<Integer> userPicks = new ArrayList<>();
+        try {
             for (String arg : args) {
-                typy.add(Integer.parseInt(arg));
+                userPicks.add(Integer.parseInt(arg));
             }
-        } else {
-            Scanner scanner = new Scanner(System.in);
-            System.out.print("Podaj 6 liczb (oddzielonych spacją): ");
-            while (typy.size() < 6) {
-                typy.add(scanner.nextInt());
+        } catch (NumberFormatException e) {
+            System.out.println("Błąd: Argumenty muszą być liczbami całkowitymi.");
+            return;
+        }
+
+        ArrayList<Integer> drawnNumbers = drawNumbers();
+        System.out.println("Twoje typy: " + userPicks);
+        System.out.println("Wylosowane liczby: " + drawnNumbers);
+
+        int hits = countHits(userPicks, drawnNumbers);
+        System.out.println("Liczba trafień: " + hits);
+
+        System.out.println("--------------------------------------------------");
+
+        System.out.println("Rozpoczynam symulację pełnego trafienia (to może chwilę potrwać)...");
+
+        long startTime = System.currentTimeMillis();
+        long drawsCount = 0;
+
+        while (true) {
+            drawsCount++;
+            ArrayList<Integer> currentDraw = drawNumbers();
+
+            if (countHits(userPicks, currentDraw) == 6) {
+                break;
             }
         }
 
-        ArrayList<Integer> wylosowane = new ArrayList<>();
+        long endTime = System.currentTimeMillis();
+        long totalTime = endTime - startTime;
+
+        System.out.println("Liczba losowań potrzebnych do pełnego trafienia: " + drawsCount);
+        System.out.println("Łączny czas działania programu: " + totalTime + " ms");
+    }
+
+
+    private static ArrayList<Integer> drawNumbers() {
+        ArrayList<Integer> numbers = new ArrayList<>();
         Random random = new Random();
 
-        while (wylosowane.size() < 6) {
-            int liczba = random.nextInt(49) + 1;
-            if (!wylosowane.contains(liczba)) {
-                wylosowane.add(liczba);
+        while (numbers.size() < 6) {
+            int num = random.nextInt(49) + 1; // Losuje od 1 do 49
+            if (!numbers.contains(num)) {
+                numbers.add(num);
             }
         }
+        return numbers;
+    }
 
-        int trafienia = 0;
-        for (int typ : typy) {
-            if (wylosowane.contains(typ)) {
-                trafienia++;
+
+    private static int countHits(ArrayList<Integer> userPicks, ArrayList<Integer> drawnNumbers) {
+        int hits = 0;
+        for (Integer pick : userPicks) {
+            if (drawnNumbers.contains(pick)) {
+                hits++;
             }
         }
-
-        System.out.println("Twoje typy: " + typy);
-        System.out.println("Wylosowane liczby: " + wylosowane);
-        System.out.println("Liczba trafień: " + trafienia);
+        return hits;
     }
 }
